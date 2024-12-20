@@ -47,7 +47,7 @@
 
         #canvas {
             background-color: white;
-            border: 3px solid #e0e0e0; /* Borda mais clara */
+            border: 3px solid #e0e0e0;
             border-radius: 8px;
             max-width: 100%;
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
@@ -145,25 +145,25 @@
         };
 
         function drawImageInBlocks(img) {
-            const blockWidth = 170; // Reduzido levemente
-            const blockHeight = 230; // Reduzido levemente
-            const padding = 20; // Aumentado o espaçamento
+            const blockWidth = 170; 
+            const blockHeight = 230; 
+            const padding = 20; 
             const borderWidth = 2;
-            const borderColor = '#e0e0e0'; // Borda mais clara
+            const borderColor = '#e0e0e0'; 
 
-            // Fundo branco
+       
             ctx.fillStyle = 'white';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Calcular o espaço total ocupado pelos blocos
+          
             const totalWidth = (blockWidth * 3) + (padding * 2);
             const totalHeight = (blockHeight * 2) + padding;
 
-            // Calcular o ponto de início para centralizar
+            
             const startX = (canvas.width - totalWidth) / 2;
             const startY = (canvas.height - totalHeight) / 2;
 
-            // Matriz de transformações para criar 6 cópias da imagem
+         
             const transformations = [
                 { sx: 0, sy: 0 },
                 { sx: 1, sy: 0 },
@@ -173,7 +173,7 @@
                 { sx: 2, sy: 1 }
             ];
 
-            // Função para calcular o recorte mantendo a proporção
+          
             function calculateCrop(img, targetWidth, targetHeight) {
                 const imgRatio = img.width / img.height;
                 const targetRatio = targetWidth / targetHeight;
@@ -195,15 +195,15 @@
                 return { sourceX, sourceY, sourceWidth, sourceHeight };
             }
 
-            // Calcular o recorte correto
+          
             const crop = calculateCrop(img, blockWidth, blockHeight);
 
-            // Desenhar a imagem em 6 blocos diferentes
+        
             transformations.forEach(transform => {
                 const x = startX + transform.sx * (blockWidth + padding);
                 const y = startY + transform.sy * (blockHeight + padding);
 
-                // Desenhar a imagem
+            
                 ctx.drawImage(
                     img, 
                     crop.sourceX, crop.sourceY, crop.sourceWidth, crop.sourceHeight,
@@ -212,7 +212,6 @@
                     blockHeight
                 );
 
-                // Desenhar borda
                 ctx.strokeStyle = borderColor;
                 ctx.lineWidth = borderWidth;
                 ctx.strokeRect(x, y, blockWidth, blockHeight);
@@ -230,7 +229,7 @@
         function resetCanvas() {
             ctx.fillStyle = 'white';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            inputImage.value = ''; // Limpar o input de arquivo
+            inputImage.value = ''; 
         }
     </script>
 </body>
