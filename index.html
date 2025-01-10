@@ -110,7 +110,7 @@
     <div class="container">
         <h1>Gerador de Fotos 3x4</h1>
         <input type="file" id="inputImage" accept="image/*">
-        <canvas id="canvas" width="900" height="600"></canvas>
+        <canvas id="canvas" width="2700" height="1800"></canvas>
         <div class="button-container">
             <button id="saveBtn">Salvar Imagem</button>
             <button id="resetBtn">Limpar</button>
@@ -146,25 +146,21 @@
         };
 
         function drawImageInBlocks(img) {
-            const blockWidth = 170; 
-            const blockHeight = 230; 
-            const padding = 20; 
-            const borderWidth = 2;
+            const blockWidth = 510; 
+            const blockHeight = 690; 
+            const padding = 60; 
+            const borderWidth = 6;
             const borderColor = '#e0e0e0'; 
 
-       
             ctx.fillStyle = 'white';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-          
             const totalWidth = (blockWidth * 3) + (padding * 2);
             const totalHeight = (blockHeight * 2) + padding;
 
-            
             const startX = (canvas.width - totalWidth) / 2;
             const startY = (canvas.height - totalHeight) / 2;
 
-         
             const transformations = [
                 { sx: 0, sy: 0 },
                 { sx: 1, sy: 0 },
@@ -174,7 +170,6 @@
                 { sx: 2, sy: 1 }
             ];
 
-          
             function calculateCrop(img, targetWidth, targetHeight) {
                 const imgRatio = img.width / img.height;
                 const targetRatio = targetWidth / targetHeight;
@@ -196,15 +191,12 @@
                 return { sourceX, sourceY, sourceWidth, sourceHeight };
             }
 
-          
             const crop = calculateCrop(img, blockWidth, blockHeight);
 
-        
             transformations.forEach(transform => {
                 const x = startX + transform.sx * (blockWidth + padding);
                 const y = startY + transform.sy * (blockHeight + padding);
 
-            
                 ctx.drawImage(
                     img, 
                     crop.sourceX, crop.sourceY, crop.sourceWidth, crop.sourceHeight,
@@ -220,7 +212,7 @@
         }
 
         function saveImage() {
-            const imgURL = canvas.toDataURL("image/jpeg");
+            const imgURL = canvas.toDataURL("image/jpeg", 1.0); 
             const a = document.createElement("a");
             a.href = imgURL;
             a.download = "fotos_3x4.jpg";
