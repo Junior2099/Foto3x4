@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gerador de Fotos 3x4</title>
-    <link rel="icon" type="image/png" sizes="32x32" href="https://img.icons8.com/?size=100&id=49313&format=png&color=000000">
+    <link rel="icon" type="image/png" href="https://img.icons8.com/?size=100&id=49313&format=png&color=000000">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
         * {
@@ -21,29 +22,22 @@
             align-items: center;
             min-height: 100vh;
             padding: 20px;
-            line-height: 1.6;
         }
 
         .container {
             background-color: white;
             border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
             padding: 30px;
             width: 100%;
             max-width: 1000px;
             text-align: center;
-            transition: all 0.3s ease;
-        }
-
-        .container:hover {
-            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
         }
 
         h1 {
             color: #333;
             margin-bottom: 25px;
             font-weight: 700;
-            font-size: 2rem;
         }
 
         #canvas {
@@ -51,26 +45,46 @@
             border: 3px solid #e0e0e0;
             border-radius: 8px;
             max-width: 100%;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
             margin: 20px 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
         }
 
-        #inputImage {
+        .selector-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        select {
+            padding: 10px;
+            border-radius: 8px;
+            border: 2px solid #4CAF50;
+            font-weight: bold;
+        }
+
+        #flagIcon {
+            width: 40px;
+            height: 28px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+
+        input[type="file"] {
             margin-bottom: 20px;
             padding: 10px;
             border: 2px dashed #4CAF50;
             border-radius: 8px;
-            transition: border-color 0.3s ease;
-        }
-
-        #inputImage:hover {
-            border-color: #2196F3;
+            width: 100%;
+            max-width: 400px;
         }
 
         .button-container {
             display: flex;
             justify-content: center;
             gap: 15px;
+            margin-top: 20px;
         }
 
         button {
@@ -79,8 +93,8 @@
             font-weight: 500;
             cursor: pointer;
             border-radius: 6px;
-            transition: all 0.3s ease;
             border: none;
+            transition: all 0.3s ease;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
@@ -106,11 +120,23 @@
         }
     </style>
 </head>
+
 <body>
+
     <div class="container">
         <h1>Gerador de Fotos 3x4</h1>
+
+        <div class="selector-container">
+            <select id="sizeSelector">
+                <option value="3x4">3x4 cm (Brasil)</option>
+                <option value="3.5x4.5">3,5x4,5 cm (Haiti)</option>
+            </select>
+            <img id="flagIcon" src="https://flagcdn.com/w40/br.png" alt="Bandeira">
+        </div>
+
         <input type="file" id="inputImage" accept="image/*">
         <canvas id="canvas" width="2700" height="1800"></canvas>
+
         <div class="button-container">
             <button id="saveBtn">Salvar Imagem</button>
             <button id="resetBtn">Limpar</button>
@@ -122,106 +148,97 @@
         const canvas = document.getElementById("canvas");
         const saveBtn = document.getElementById("saveBtn");
         const resetBtn = document.getElementById("resetBtn");
+        const sizeSelector = document.getElementById("sizeSelector");
+        const flagIcon = document.getElementById("flagIcon");
         const ctx = canvas.getContext("2d");
 
         let image = new Image();
+        let imageLoaded = false;
 
         inputImage.addEventListener("change", handleImageUpload);
         saveBtn.addEventListener("click", saveImage);
         resetBtn.addEventListener("click", resetCanvas);
+        sizeSelector.addEventListener("change", function () {
+            updateFlagIcon();
+            if (imageLoaded) drawImageInBlocks(image);
+        });
+
+        function updateFlagIcon() {
+            flagIcon.src = sizeSelector.value === "3x4"
+                ? "https://flagcdn.com/w40/br.png"
+                : "https://flagcdn.com/w40/ht.png";
+        }
 
         function handleImageUpload(event) {
             const file = event.target.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = function (e) {
-                    image.src = e.target.result;
-                };
+                reader.onload = e => image.src = e.target.result;
                 reader.readAsDataURL(file);
             }
         }
 
         image.onload = function () {
+            imageLoaded = true;
             drawImageInBlocks(image);
         };
 
         function drawImageInBlocks(img) {
-            const blockWidth = 510; 
-            const blockHeight = 690; 
-            const padding = 60; 
-            const borderWidth = 6;
-            const borderColor = '#e0e0e0'; 
+            const size = sizeSelector.value;
+            const block = size === "3x4" ? { w: 510, h: 690 } : { w: 600, h: 780 };
+            const padding = 60, border = 6, borderColor = '#e0e0e0';
 
             ctx.fillStyle = 'white';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            const totalWidth = (blockWidth * 3) + (padding * 2);
-            const totalHeight = (blockHeight * 2) + padding;
+            const totalW = block.w * 3 + padding * 2;
+            const totalH = block.h * 2 + padding;
+            const startX = (canvas.width - totalW) / 2;
+            const startY = (canvas.height - totalH) / 2;
 
-            const startX = (canvas.width - totalWidth) / 2;
-            const startY = (canvas.height - totalHeight) / 2;
+            const crop = calculateCrop(img, block.w, block.h);
 
-            const transformations = [
-                { sx: 0, sy: 0 },
-                { sx: 1, sy: 0 },
-                { sx: 2, sy: 0 },
-                { sx: 0, sy: 1 },
-                { sx: 1, sy: 1 },
-                { sx: 2, sy: 1 }
-            ];
+            [0, 1, 2, 3, 4, 5].forEach(i => {
+                const x = startX + (i % 3) * (block.w + padding);
+                const y = startY + Math.floor(i / 3) * (block.h + padding);
 
-            function calculateCrop(img, targetWidth, targetHeight) {
-                const imgRatio = img.width / img.height;
-                const targetRatio = targetWidth / targetHeight;
+                ctx.drawImage(img, crop.x, crop.y, crop.w, crop.h, x, y, block.w, block.h);
 
-                let sourceWidth, sourceHeight, sourceX, sourceY;
-
-                if (imgRatio > targetRatio) {
-                    sourceHeight = img.height;
-                    sourceWidth = sourceHeight * targetRatio;
-                    sourceX = (img.width - sourceWidth) / 2;
-                    sourceY = 0;
-                } else {
-                    sourceWidth = img.width;
-                    sourceHeight = sourceWidth / targetRatio;
-                    sourceX = 0;
-                    sourceY = (img.height - sourceHeight) / 2;
+                if (size === "3.5x4.5") {
+                    ctx.strokeStyle = borderColor;
+                    ctx.lineWidth = border;
+                    ctx.strokeRect(x, y, block.w, block.h);
                 }
-
-                return { sourceX, sourceY, sourceWidth, sourceHeight };
-            }
-
-            const crop = calculateCrop(img, blockWidth, blockHeight);
-
-            transformations.forEach(transform => {
-                const x = startX + transform.sx * (blockWidth + padding);
-                const y = startY + transform.sy * (blockHeight + padding);
-
-                ctx.drawImage(
-                    img, 
-                    crop.sourceX, crop.sourceY, crop.sourceWidth, crop.sourceHeight,
-                    x, y, 
-                    blockWidth, 
-                    blockHeight
-                );
-
-              
             });
         }
 
+        function calculateCrop(img, targetW, targetH) {
+            const ratio = targetW / targetH, imgRatio = img.width / img.height;
+            if (imgRatio > ratio) {
+                const h = img.height, w = h * ratio;
+                return { x: (img.width - w) / 2, y: 0, w, h };
+            } else {
+                const w = img.width, h = w / ratio;
+                return { x: 0, y: (img.height - h) / 2, w, h };
+            }
+        }
+
         function saveImage() {
-            const imgURL = canvas.toDataURL("image/jpeg", 1.0); 
-            const a = document.createElement("a");
-            a.href = imgURL;
-            a.download = "fotos_3x4.jpg";
-            a.click();
+            const link = document.createElement("a");
+            link.href = canvas.toDataURL("image/jpeg", 1.0);
+            link.download = "foto_3x4.jpg";
+            link.click();
         }
 
         function resetCanvas() {
             ctx.fillStyle = 'white';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            inputImage.value = ''; 
+            inputImage.value = '';
+            imageLoaded = false;
         }
+
+        updateFlagIcon(); 
     </script>
 </body>
+
 </html>
