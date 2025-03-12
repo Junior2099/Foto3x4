@@ -1,3 +1,7 @@
-![image](https://github.com/user-attachments/assets/b7e5a82a-39ca-47f2-a149-d3b9b3c2c8b1)
+## LAYOUT DO SITE
+![image](https://github.com/user-attachments/assets/cba60ec6-4c19-4dd0-b61b-5709de80a4b7)
+![image](https://github.com/user-attachments/assets/5ac5381a-8f60-4161-b15d-def4a82bb0cb)
 
-![image](https://github.com/user-attachments/assets/463b0e7f-03af-45b4-9c7e-040612834ae7)
+## FUNCIONANDO
+![image](https://github.com/user-attachments/assets/a277caf3-4043-42cf-87ed-ba31b034ecaf)
+
