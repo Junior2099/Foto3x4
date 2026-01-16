@@ -4,9 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerador de Fotos 3x4</title>
-    <link rel="icon" type="image/png" href="https://img.icons8.com/?size=100&id=49313&format=png&color=000000">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <title>Gerador de Fotos para Documentos</title>
+
+    <link rel="icon" type="image/png"
+        href="https://img.icons8.com/?size=100&id=49313&format=png&color=000000">
+
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
+        rel="stylesheet">
+
     <style>
         * {
             margin: 0;
@@ -17,43 +22,33 @@
         body {
             font-family: 'Roboto', Arial, sans-serif;
             background-color: #f4f4f4;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
             padding: 20px;
         }
 
         .container {
-            background-color: white;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            padding: 30px;
+            background: #fff;
             width: 100%;
             max-width: 1000px;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
             text-align: center;
         }
 
         h1 {
-            color: #333;
             margin-bottom: 25px;
-            font-weight: 700;
-        }
-
-        #canvas {
-            background-color: white;
-            border: 3px solid #e0e0e0;
-            border-radius: 8px;
-            max-width: 100%;
-            margin: 20px 0;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            color: #333;
         }
 
         .selector-container {
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
             margin-bottom: 20px;
         }
 
@@ -62,6 +57,7 @@
             border-radius: 8px;
             border: 2px solid #4CAF50;
             font-weight: bold;
+            cursor: pointer;
         }
 
         #flagIcon {
@@ -72,12 +68,22 @@
         }
 
         input[type="file"] {
-            margin-bottom: 20px;
-            padding: 10px;
+            margin: 20px 0;
+            padding: 12px;
             border: 2px dashed #4CAF50;
             border-radius: 8px;
             width: 100%;
             max-width: 400px;
+            cursor: pointer;
+        }
+
+        canvas {
+            width: 100%;
+            max-width: 900px;
+            border: 3px solid #e0e0e0;
+            border-radius: 8px;
+            margin: 20px 0;
+            background: #fff;
         }
 
         .button-container {
@@ -90,32 +96,31 @@
         button {
             padding: 12px 25px;
             font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
             border-radius: 6px;
             border: none;
-            transition: all 0.3s ease;
+            cursor: pointer;
+            font-weight: bold;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            transition: all 0.3s ease;
         }
 
         #saveBtn {
-            background-color: #2196F3;
-            color: white;
+            background: #2196F3;
+            color: #fff;
         }
 
         #saveBtn:hover {
-            background-color: #1976D2;
+            background: #1976D2;
             transform: translateY(-2px);
         }
 
         #resetBtn {
-            background-color: #f44336;
-            color: white;
+            background: #f44336;
+            color: #fff;
         }
 
         #resetBtn:hover {
-            background-color: #d32f2f;
+            background: #d32f2f;
             transform: translateY(-2px);
         }
     </style>
@@ -124,17 +129,20 @@
 <body>
 
     <div class="container">
-        <h1>Gerador de Fotos 3x4</h1>
+        <h1>Gerador de Fotos para Documentos</h1>
 
         <div class="selector-container">
             <select id="sizeSelector">
                 <option value="3x4">3x4 cm (Brasil)</option>
                 <option value="3.5x4.5">3,5x4,5 cm (Haiti)</option>
+                <option value="2x2">2x2 cm</option>
             </select>
-            <img id="flagIcon" src="https://flagcdn.com/w40/br.png" alt="Bandeira">
+            <img id="flagIcon" src="" alt="Bandeira">
         </div>
 
         <input type="file" id="inputImage" accept="image/*">
+
+        <!-- Canvas A4 horizontal em alta qualidade -->
         <canvas id="canvas" width="2700" height="1800"></canvas>
 
         <div class="button-container">
@@ -146,79 +154,104 @@
     <script>
         const inputImage = document.getElementById("inputImage");
         const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
         const saveBtn = document.getElementById("saveBtn");
         const resetBtn = document.getElementById("resetBtn");
         const sizeSelector = document.getElementById("sizeSelector");
         const flagIcon = document.getElementById("flagIcon");
-        const ctx = canvas.getContext("2d");
 
-        let image = new Image();
+        const image = new Image();
         let imageLoaded = false;
 
-        inputImage.addEventListener("change", handleImageUpload);
+        inputImage.addEventListener("change", handleUpload);
         saveBtn.addEventListener("click", saveImage);
         resetBtn.addEventListener("click", resetCanvas);
-        sizeSelector.addEventListener("change", function () {
-            updateFlagIcon();
-            if (imageLoaded) drawImageInBlocks(image);
-        });
+        sizeSelector.addEventListener("change", redraw);
 
-        function updateFlagIcon() {
-            flagIcon.src = sizeSelector.value === "3x4"
-                ? "https://flagcdn.com/w40/br.png"
-                : "https://flagcdn.com/w40/ht.png";
+        function handleUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = ev => image.src = ev.target.result;
+            reader.readAsDataURL(file);
         }
 
-        function handleImageUpload(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = e => image.src = e.target.result;
-                reader.readAsDataURL(file);
+        image.onload = () => {
+            imageLoaded = true;
+            drawPhotos();
+        };
+
+        function redraw() {
+            updateFlag();
+            if (imageLoaded) drawPhotos();
+        }
+
+        function updateFlag() {
+            if (sizeSelector.value === "3x4") {
+                flagIcon.src = "https://flagcdn.com/w40/br.png";
+            } else if (sizeSelector.value === "3.5x4.5") {
+                flagIcon.src = "https://flagcdn.com/w40/ht.png";
+            } else {
+                flagIcon.src = "https://img.icons8.com/ios-filled/50/document--v1.png";
             }
         }
 
-        image.onload = function () {
-            imageLoaded = true;
-            drawImageInBlocks(image);
-        };
+        function drawPhotos() {
+            let block;
 
-        function drawImageInBlocks(img) {
-            const size = sizeSelector.value;
-            const block = size === "3x4" ? { w: 510, h: 690 } : { w: 600, h: 780 };
-            const padding = 60, border = 6, borderColor = '#e0e0e0';
+            if (sizeSelector.value === "3x4") {
+                block = { w: 510, h: 690 };
+            } else if (sizeSelector.value === "3.5x4.5") {
+                block = { w: 600, h: 780 };
+            } else {
+                block = { w: 450, h: 450 };
+            }
 
-            ctx.fillStyle = 'white';
+            const padding = 60;
+            const cols = 3;
+            const rows = 2;
+
+            ctx.fillStyle = "#fff";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            const totalW = block.w * 3 + padding * 2;
-            const totalH = block.h * 2 + padding;
+            const totalW = block.w * cols + padding * (cols - 1);
+            const totalH = block.h * rows + padding * (rows - 1);
+
             const startX = (canvas.width - totalW) / 2;
             const startY = (canvas.height - totalH) / 2;
 
-            const crop = calculateCrop(img, block.w, block.h);
+            const crop = calculateCrop(image, block.w, block.h);
 
-            [0, 1, 2, 3, 4, 5].forEach(i => {
-                const x = startX + (i % 3) * (block.w + padding);
-                const y = startY + Math.floor(i / 3) * (block.h + padding);
+            for (let i = 0; i < cols * rows; i++) {
+                const x = startX + (i % cols) * (block.w + padding);
+                const y = startY + Math.floor(i / cols) * (block.h + padding);
 
-                ctx.drawImage(img, crop.x, crop.y, crop.w, crop.h, x, y, block.w, block.h);
+                ctx.drawImage(
+                    image,
+                    crop.x, crop.y, crop.w, crop.h,
+                    x, y, block.w, block.h
+                );
 
-                if (size === "3.5x4.5") {
-                    ctx.strokeStyle = borderColor;
-                    ctx.lineWidth = border;
+                if (sizeSelector.value !== "3x4") {
+                    ctx.strokeStyle = "#e0e0e0";
+                    ctx.lineWidth = 6;
                     ctx.strokeRect(x, y, block.w, block.h);
                 }
-            });
+            }
         }
 
         function calculateCrop(img, targetW, targetH) {
-            const ratio = targetW / targetH, imgRatio = img.width / img.height;
-            if (imgRatio > ratio) {
-                const h = img.height, w = h * ratio;
+            const targetRatio = targetW / targetH;
+            const imgRatio = img.width / img.height;
+
+            if (imgRatio > targetRatio) {
+                const h = img.height;
+                const w = h * targetRatio;
                 return { x: (img.width - w) / 2, y: 0, w, h };
             } else {
-                const w = img.width, h = w / ratio;
+                const w = img.width;
+                const h = w / targetRatio;
                 return { x: 0, y: (img.height - h) / 2, w, h };
             }
         }
@@ -226,19 +259,19 @@
         function saveImage() {
             const link = document.createElement("a");
             link.href = canvas.toDataURL("image/jpeg", 1.0);
-            link.download = "foto_3x4.jpg";
+            link.download = "foto_documento.jpg";
             link.click();
         }
 
         function resetCanvas() {
-            ctx.fillStyle = 'white';
+            ctx.fillStyle = "#fff";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            inputImage.value = '';
+            inputImage.value = "";
             imageLoaded = false;
         }
 
-        updateFlagIcon(); 
+        updateFlag();
     </script>
-</body>
 
+</body>
 </html>
