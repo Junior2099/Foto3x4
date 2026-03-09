@@ -6,11 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gerador de Fotos para Documentos</title>
 
-    <link rel="icon" type="image/png"
-        href="https://img.icons8.com/?size=100&id=49313&format=png&color=000000">
+    <link rel="icon" type="image/png" href="https://img.icons8.com/?size=100&id=49313&format=png&color=000000">
 
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
 
     <style>
         * {
@@ -136,6 +134,7 @@
                 <option value="3x4">3x4 cm (Brasil)</option>
                 <option value="3.5x4.5">3,5x4,5 cm (Haiti)</option>
                 <option value="2x2">2x2 cm</option>
+                <option value="4x4">4x4 cm</option>
             </select>
             <img id="flagIcon" src="" alt="Bandeira">
         </div>
@@ -204,6 +203,8 @@
                 block = { w: 510, h: 690 };
             } else if (sizeSelector.value === "3.5x4.5") {
                 block = { w: 600, h: 780 };
+            } else if (sizeSelector.value === "4x4") {
+                block = { w: 680, h: 680 };
             } else {
                 block = { w: 450, h: 450 };
             }
@@ -274,4 +275,5 @@
     </script>
 
 </body>
+
 </html>
